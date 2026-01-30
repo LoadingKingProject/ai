@@ -39,6 +39,68 @@ def calculate_screen_position(x, y, frame_r, cam_w, cam_h, screen_w, screen_h):
     return screen_x, screen_y
 
 
+def extract_landmarks(hand_landmarks, img_shape):
+    """Extract normalized landmark coordinates from hand detection results.
+
+    Converts MediaPipe hand landmark positions (normalized 0-1 range) to
+    pixel coordinates based on image dimensions.
+
+    Args:
+        hand_landmarks: MediaPipe hand landmarks object containing landmark positions
+        img_shape: Tuple of (height, width, channels) from image.shape
+
+    Returns:
+        List of [id, cx, cy] where id is landmark index, cx/cy are pixel coordinates
+    """
+    lmList = []
+    h, w, c = img_shape
+    for id, lm in enumerate(hand_landmarks.landmark):
+        cx, cy = int(lm.x * w), int(lm.y * h)
+        lmList.append([id, cx, cy])
+    return lmList
+
+
+def apply_smoothing(current_x, current_y, prev_x, prev_y, factor):
+    """Apply exponential smoothing to reduce cursor jitter.
+
+    Uses weighted average between previous and current positions to create
+    smooth cursor movement. Higher factor = smoother but slower response.
+
+    Args:
+        current_x: Target X coordinate from hand tracking
+        current_y: Target Y coordinate from hand tracking
+        prev_x: Previous smoothed X coordinate
+        prev_y: Previous smoothed Y coordinate
+        factor: Smoothing factor (higher = more smoothing, typically 1-10)
+
+    Returns:
+        Tuple of (new_x, new_y) - smoothed coordinates
+    """
+    new_x = prev_x + (current_x - prev_x) / factor
+    new_y = prev_y + (current_y - prev_y) / factor
+    return new_x, new_y
+
+
+def detect_click(x1, y1, x2, y2, threshold):
+    """Detect click gesture by measuring distance between two points.
+
+    Calculates Euclidean distance between thumb tip and index finger tip.
+    Click is detected when distance falls below threshold (pinch gesture).
+
+    Args:
+        x1: X coordinate of first point (index finger tip)
+        y1: Y coordinate of first point (index finger tip)
+        x2: X coordinate of second point (thumb tip)
+        y2: Y coordinate of second point (thumb tip)
+        threshold: Maximum distance to register as click (pixels)
+
+    Returns:
+        Boolean - True if distance < threshold (click detected), False otherwise
+    """
+    distance = np.hypot(x2 - x1, y2 - y1)
+    return distance < threshold
+
+
 def run_smart_presenter():
     # 1. 카메라 및 AI 모델 초기화
     cap = cv2.VideoCapture(CAM_ID)
@@ -92,11 +154,7 @@ def run_smart_presenter():
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-                lmList = []
-                for id, lm in enumerate(hand_landmarks.landmark):
-                    h, w, c = img.shape
-                    cx, cy = int(lm.x * w), int(lm.y * h)
-                    lmList.append([id, cx, cy])
+                lmList = extract_landmarks(hand_landmarks, img.shape)
 
                 if len(lmList) != 0:
                     # 좌표 추출: 8번(검지 끝), 4번(엄지 끝)
@@ -110,8 +168,7 @@ def run_smart_presenter():
                     )
 
                     # 스무딩 적용 (떨림 방지)
-                    clocX = plocX + (x3 - plocX) / SMOOTHING
-                    clocY = plocY + (y3 - plocY) / SMOOTHING
+                    clocX, clocY = apply_smoothing(x3, y3, plocX, plocY, SMOOTHING)
 
                     # 마우스 커서 이동
                     try:
@@ -122,10 +179,8 @@ def run_smart_presenter():
                     plocX, plocY = clocX, clocY
 
                     # 5. 클릭 감지 (엄지 + 검지)
-                    distance = np.hypot(x2 - x1, y2 - y1)
-
                     # 클릭 상태 시각화
-                    if distance < CLICK_DIST:
+                    if detect_click(x1, y1, x2, y2, CLICK_DIST):
                         cv2.circle(img, (x1, y1), 15, (0, 255, 0), cv2.FILLED)  # 초록색
                         pyautogui.click()
                     else:

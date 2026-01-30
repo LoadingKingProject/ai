@@ -1,0 +1,7 @@
+{
+  "name": "Vision OS Interface",
+  "description": "A cinematic, futuristic vision calibration and gesture control interface.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

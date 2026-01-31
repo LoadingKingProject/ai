@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { AppStage } from './types';
-import { INTRO_VIDEO_URL, CALIBRATION_DURATION_MS, SUCCESS_MESSAGE_DURATION_MS } from './constants';
+import { INTRO_VIDEO_URL, CALIBRATION_DURATION_MS, SUCCESS_MESSAGE_DURATION_MS, WEBSOCKET_URL } from './constants';
 import { VideoBackground } from './components/VideoBackground';
 import { WebcamFeed } from './components/WebcamFeed';
 import { HUDOverlay } from './components/HUDOverlay';
+import { HandLandmarks } from './components/HandLandmarks';
+import { useWebSocket } from './hooks/useWebSocket';
 
 const App: React.FC = () => {
   const [stage, setStage] = useState<AppStage>(AppStage.BOOT_SEQUENCE);
+  
+  // WebSocket connection for hand tracking
+  const { 
+    connectionState, 
+    landmarks, 
+    gesture, 
+    connect, 
+    disconnect 
+  } = useWebSocket(WEBSOCKET_URL);
 
   // Handle Video Completion
   const handleVideoEnded = () => {
@@ -34,6 +45,20 @@ const App: React.FC = () => {
     }
   }, [stage]);
 
+  // Auto-connect to WebSocket when entering ACTIVE_MODE
+  useEffect(() => {
+    if (stage === AppStage.ACTIVE_MODE && connectionState === 'disconnected') {
+      connect();
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (connectionState === 'connected') {
+        disconnect();
+      }
+    };
+  }, [stage, connectionState, connect, disconnect]);
+
   return (
     <div className="relative w-screen h-screen bg-black overflow-hidden">
       
@@ -52,18 +77,24 @@ const App: React.FC = () => {
         <WebcamFeed />
       )}
 
-      {/* LAYER 2: UI Overlay */}
-      {/* We only show the HUD if we are NOT in the boot sequence (video playing),
-          or you can overlay HUD *over* the video if desired. 
-          Here we show it after video starts fading or ends. 
-      */}
+      {/* LAYER 2: Hand Landmarks Overlay (only in ACTIVE_MODE) */}
+      {stage === AppStage.ACTIVE_MODE && (
+        <HandLandmarks landmarks={landmarks} />
+      )}
+
+      {/* LAYER 3: UI Overlay */}
       {stage !== AppStage.BOOT_SEQUENCE && (
         <div className="absolute inset-0 animate-in fade-in duration-1000">
-           <HUDOverlay stage={stage} />
+           <HUDOverlay 
+             stage={stage} 
+             connectionState={connectionState}
+             gesture={gesture}
+             onReconnect={connect}
+           />
         </div>
       )}
       
-      {/* Optional: Skip button for development/demo purposes (hidden in prod feel) */}
+      {/* Optional: Skip button for development/demo purposes */}
       {/* <button 
         onClick={() => setStage(AppStage.CALIBRATING)}
         className="fixed top-2 right-2 z-50 text-xs text-gray-700 opacity-20 hover:opacity-100"

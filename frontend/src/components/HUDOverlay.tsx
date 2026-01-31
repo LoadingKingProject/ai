@@ -1,12 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { AppStage } from '../types';
-import { Scan, Activity, Zap, CheckCircle2, Lock, Crosshair, Aperture } from 'lucide-react';
+import type { ConnectionState, GestureType } from '../types/websocket';
+import { Scan, Zap, CheckCircle2, Lock, Crosshair, Aperture, Wifi, WifiOff, Hand, Move, ZoomIn, ArrowLeft, ArrowRight, MousePointer } from 'lucide-react';
 
 interface HUDOverlayProps {
   stage: AppStage;
+  connectionState?: ConnectionState;
+  gesture?: GestureType;
+  onReconnect?: () => void;
 }
 
-export const HUDOverlay: React.FC<HUDOverlayProps> = ({ stage }) => {
+/**
+ * Get display text and icon for current gesture
+ */
+const getGestureDisplay = (gesture: GestureType | undefined) => {
+  switch (gesture) {
+    case 'click':
+      return { text: 'CLICK DETECTED', icon: MousePointer };
+    case 'drag':
+      return { text: 'DRAG MODE', icon: Move };
+    case 'zoom':
+      return { text: 'ZOOM MODE', icon: ZoomIn };
+    case 'swipe_left':
+      return { text: 'SWIPE ←', icon: ArrowLeft };
+    case 'swipe_right':
+      return { text: 'SWIPE →', icon: ArrowRight };
+    case 'palm_open':
+      return { text: 'PALM OPEN - SWIPE READY', icon: Hand };
+    default:
+      return null;
+  }
+};
+
+export const HUDOverlay: React.FC<HUDOverlayProps> = ({ 
+  stage, 
+  connectionState = 'disconnected' as ConnectionState,
+  gesture = 'none' as GestureType,
+  onReconnect 
+}) => {
   const [randomCode, setRandomCode] = useState("0000");
   const [coords, setCoords] = useState({ x: 0, y: 0 });
 
@@ -25,6 +56,23 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({ stage }) => {
   const isCalibrating = stage === AppStage.CALIBRATING;
   const isComplete = stage === AppStage.CALIBRATION_COMPLETE;
   const isActive = stage === AppStage.ACTIVE_MODE;
+
+  // Get backend connection status display
+  const getConnectionDisplay = () => {
+    switch (connectionState) {
+      case 'connected':
+        return { text: 'BACKEND: CONNECTED', color: 'text-emerald-400', dotColor: 'bg-emerald-500', Icon: Wifi };
+      case 'connecting':
+        return { text: 'CONNECTING...', color: 'text-yellow-400', dotColor: 'bg-yellow-500', Icon: Wifi };
+      case 'error':
+        return { text: 'BACKEND: ERROR', color: 'text-red-400', dotColor: 'bg-red-500', Icon: WifiOff };
+      default:
+        return { text: 'BACKEND: OFFLINE', color: 'text-red-400', dotColor: 'bg-red-500', Icon: WifiOff };
+    }
+  };
+
+  const connectionDisplay = getConnectionDisplay();
+  const gestureDisplay = getGestureDisplay(gesture);
 
   return (
     <div className="absolute inset-0 z-30 pointer-events-none select-none p-4 md:p-8 flex flex-col justify-between overflow-hidden">
@@ -55,6 +103,7 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({ stage }) => {
 
         {/* Top Right Block */}
         <div className="text-right border-r-2 border-emerald-500/50 pr-4">
+          {/* Network Status */}
           <div className="font-mono-tech text-xs text-emerald-400 tracking-widest flex items-center justify-end gap-2">
             <span>NET: CONNECTED</span>
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -62,6 +111,23 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({ stage }) => {
           <div className="font-mono-tech text-[10px] text-emerald-600/80 mt-1">
             LAT: {coords.x}.{randomCode} / LON: {coords.y}.{randomCode}
           </div>
+          
+          {/* Backend Connection Status */}
+          <div className={`font-mono-tech text-xs tracking-widest flex items-center justify-end gap-2 mt-2 ${connectionDisplay.color}`}>
+            <connectionDisplay.Icon className="w-3 h-3" />
+            <span>{connectionDisplay.text}</span>
+            <div className={`w-2 h-2 rounded-full ${connectionDisplay.dotColor} ${connectionState === 'connecting' ? 'animate-pulse' : ''}`}></div>
+          </div>
+          
+          {/* Reconnect Button */}
+          {connectionState === 'disconnected' && onReconnect && (
+            <button 
+              onClick={onReconnect}
+              className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 pointer-events-auto font-mono-tech tracking-widest border border-cyan-500/30 px-2 py-1 rounded hover:bg-cyan-500/10 transition-colors"
+            >
+              [RECONNECT]
+            </button>
+          )}
         </div>
       </div>
 
@@ -121,6 +187,21 @@ export const HUDOverlay: React.FC<HUDOverlayProps> = ({ stage }) => {
       <div className="flex justify-between items-end z-10">
         {/* Bottom Left Status */}
         <div className="flex flex-col gap-2">
+           {/* Gesture Display - Show when active and gesture detected */}
+           {isActive && gestureDisplay && (
+             <div className="flex items-center gap-3 text-cyan-400 animate-in slide-in-from-left-4 duration-300 mb-2">
+               <div className="p-2 border border-cyan-500/30 bg-cyan-900/10 rounded">
+                 <gestureDisplay.icon className="w-5 h-5" />
+               </div>
+               <div>
+                 <div className="font-bold tracking-[0.15em] text-md text-white drop-shadow-md">
+                   {gestureDisplay.text}
+                 </div>
+               </div>
+             </div>
+           )}
+           
+           {/* Default Active State */}
            {isActive && (
              <div className="flex items-center gap-3 text-emerald-400 animate-in slide-in-from-left-4 duration-700">
                <div className="p-2 border border-emerald-500/30 bg-emerald-900/10 rounded">

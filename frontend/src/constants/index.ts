@@ -7,3 +7,6 @@ export const INTRO_VIDEO_URL = "/helmet_intro.mp4";
 
 export const CALIBRATION_DURATION_MS = 4000; // 분석 연출 시간
 export const SUCCESS_MESSAGE_DURATION_MS = 2000; // 완료 메시지 표시 시간
+
+// WebSocket connection URL
+export const WEBSOCKET_URL = "ws://localhost:8000/ws";

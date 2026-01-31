@@ -4,12 +4,29 @@
 Write-Host "Starting Air Mouse Development Environment..." -ForegroundColor Cyan
 Write-Host ""
 
+# Python path (using uv-managed Python)
+$PYTHON = "$env:USERPROFILE\.local\bin\python3.14.exe"
+$UV = "$env:USERPROFILE\.local\bin\uv.exe"
+
+# Check if Python exists
+if (-not (Test-Path $PYTHON)) {
+    Write-Host "Python not found at: $PYTHON" -ForegroundColor Red
+    Write-Host "Trying uv run instead..." -ForegroundColor Yellow
+    $USE_UV = $true
+} else {
+    $USE_UV = $false
+}
+
 # Start Backend (Python FastAPI)
 Write-Host "[1/2] Starting Backend Server (Python FastAPI)..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\..\backend'; Write-Host 'Backend Server' -ForegroundColor Yellow; python main.py"
+if ($USE_UV) {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\..\backend'; Write-Host 'Backend Server' -ForegroundColor Yellow; uv run python main.py"
+} else {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\..\backend'; Write-Host 'Backend Server' -ForegroundColor Yellow; & '$PYTHON' main.py"
+}
 
 # Wait a moment for backend to initialize
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 3
 
 # Start Frontend (Vite React)
 Write-Host "[2/2] Starting Frontend Server (Vite React)..." -ForegroundColor Green

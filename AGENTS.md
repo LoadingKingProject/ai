@@ -1,197 +1,217 @@
 # PROJECT KNOWLEDGE BASE - Air Mouse
 
 **Generated:** 2026-01-30
-**Status:** New Project (초기 설정 필요)
+**Status:** Active Development
 
 ---
 
 ## 📋 OVERVIEW
 
-Air Mouse 프로젝트입니다. 현재 초기 단계로, 코드베이스가 구성되기 전입니다.
-이 문서는 프로젝트가 발전함에 따라 업데이트해야 합니다.
+Air Mouse는 웹캠을 통해 손 제스처를 인식하여 마우스와 키보드를 제어하는 프로젝트입니다.
+
+**구성:**
+- **Backend (Python)**: FastAPI + WebSocket + MediaPipe + PyAutoGUI
+- **Frontend (React)**: Vite + TypeScript + VisionOS 스타일 UI
 
 ---
 
 ## 🚀 QUICK START
 
-```bash
-# 프로젝트 초기화 (예시 - 프레임워크에 따라 수정 필요)
-npm init -y          # Node.js
-cargo init           # Rust
-python -m venv venv  # Python
+### 의존성 설치
 
-# 의존성 설치
-npm install          # Node.js
-cargo build          # Rust
-pip install -r requirements.txt  # Python
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+
+# Frontend
+cd frontend
+npm install
+```
+
+### 개발 서버 실행
+
+**Windows (PowerShell):**
+```powershell
+.\scripts\dev.ps1
+```
+
+**Unix/macOS:**
+```bash
+chmod +x scripts/dev.sh
+./scripts/dev.sh
+```
+
+**개별 실행:**
+```bash
+# Backend (Terminal 1)
+cd backend && python main.py
+# → http://localhost:8000
+
+# Frontend (Terminal 2)
+cd frontend && npm run dev
+# → http://localhost:3000
 ```
 
 ---
 
 ## 🔧 BUILD / TEST / LINT COMMANDS
 
-### Testing
+### Backend (Python)
 
-#### 테스트 의존성 설치
 ```bash
-pip install -r requirements-dev.txt
+# 서버 실행
+cd backend && python main.py
+
+# Health check
+curl http://localhost:8000/health
+# Expected: {"status":"ok"}
+
+# 의존성 설치
+pip install -r backend/requirements.txt
 ```
 
-#### 전체 테스트 실행
+### Frontend (React)
+
 ```bash
+# 개발 서버
+cd frontend && npm run dev
+
+# 빌드
+cd frontend && npm run build
+
+# TypeScript 검증
+cd frontend && npx tsc --noEmit
+```
+
+### 테스트
+
+```bash
+# Python 테스트
 pytest -v
-```
 
-#### 단일 테스트 파일 실행
-```bash
+# 개별 테스트
 pytest tests/test_coordinate.py -v
 pytest tests/test_smoothing.py -v
 pytest tests/test_click.py -v
 pytest tests/test_landmarks.py -v
-```
 
-#### 커버리지 리포트 포함
-```bash
+# 커버리지
 pytest --cov=. --cov-report=term-missing
 ```
 
-#### 특정 마커로 테스트 실행
-```bash
-pytest -m unit          # 모든 unit 테스트 실행
-pytest -m integration   # 모든 integration 테스트 실행
-```
-
-#### 테스트 파일 설명
-- `tests/test_coordinate.py`: `calculate_screen_position()` 함수 테스트 (4개 테스트)
-- `tests/test_smoothing.py`: `apply_smoothing()` 함수 테스트 (4개 테스트)
-- `tests/test_click.py`: `detect_click()` 함수 테스트 (5개 테스트)
-- `tests/test_landmarks.py`: `extract_landmarks()` 함수 테스트 (3개 테스트)
-
-### Build
-```bash
-# Python 프로젝트 (빌드 필요 없음)
-# 실행: python main.py
-```
-
 ### Lint
-```bash
-ruff check .         # Python Ruff
-```
 
-### Format
 ```bash
-ruff format .        # Python
+ruff check .         # Python
+ruff format .        # Python 포맷팅
 ```
 
 ---
 
 ## 📁 PROJECT STRUCTURE
 
-> **프로젝트 구조 확정 후 업데이트**
-
 ```
 Air Mouse/
-├── AGENTS.md         # 이 파일
-├── src/              # 소스 코드 (예정)
-│   ├── main.*        # 엔트리 포인트
-│   └── ...
-├── tests/            # 테스트 코드 (예정)
-├── docs/             # 문서 (예정)
-└── README.md         # 프로젝트 소개 (예정)
+├── backend/                    # Python 백엔드
+│   ├── main.py                 # FastAPI + WebSocket 서버
+│   ├── hand_tracker.py         # MediaPipe 손 인식
+│   ├── mouse_controller.py     # PyAutoGUI 마우스 제어
+│   └── requirements.txt        # Python 의존성
+│
+├── frontend/                   # React 프론트엔드
+│   ├── src/
+│   │   ├── App.tsx             # 메인 앱 컴포넌트
+│   │   ├── components/
+│   │   │   ├── HandLandmarks.tsx   # 손 랜드마크 Canvas 오버레이
+│   │   │   ├── HUDOverlay.tsx      # VisionOS 스타일 HUD
+│   │   │   ├── WebcamFeed.tsx      # 웹캠 비디오 표시
+│   │   │   └── VideoBackground.tsx # 인트로 비디오
+│   │   ├── hooks/
+│   │   │   └── useWebSocket.ts     # WebSocket 연결 훅
+│   │   ├── types/
+│   │   │   ├── index.ts            # AppStage 등
+│   │   │   └── websocket.ts        # WebSocket 메시지 타입
+│   │   ├── constants/
+│   │   │   └── index.ts            # 상수 (URL 등)
+│   │   └── styles/
+│   │       └── globals.css         # 글로벌 스타일
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── scripts/
+│   ├── dev.ps1                 # Windows 개발 스크립트
+│   └── dev.sh                  # Unix 개발 스크립트
+│
+├── tests/                      # Python 테스트
+├── main.py                     # (레거시 - 참조용)
+└── AGENTS.md                   # 이 파일
+```
+
+---
+
+## 🎮 GESTURE TYPES
+
+| 제스처 | 동작 | 트리거 |
+|--------|------|--------|
+| `none` | 마우스 이동 | 검지만 펴기 |
+| `click` / `drag` | 클릭/드래그 | 엄지 + 검지 붙이기 |
+| `zoom` | 스크롤 줌 | 엄지 + 중지 붙이기 |
+| `swipe_left` / `swipe_right` | 좌/우 화살표 | 손바닥 펴고 좌우 이동 |
+| `palm_open` | 스와이프 대기 | 손바닥 펴기 |
+
+---
+
+## 🌐 API ENDPOINTS
+
+### REST
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | 서버 상태 확인 |
+| GET | `/status` | 카메라, FPS 정보 |
+
+### WebSocket
+
+| Endpoint | Direction | Description |
+|----------|-----------|-------------|
+| `/ws` | Server → Client | 손 인식 데이터 (30fps) |
+
+**메시지 형식:**
+```json
+{
+  "type": "hand_data",
+  "landmarks": [{"id": 0, "x": 0.5, "y": 0.3}, ...],
+  "gesture": "none",
+  "mouse_position": {"x": 960, "y": 540},
+  "is_palm_open": false,
+  "fps": 30,
+  "timestamp": 1706000000000
+}
 ```
 
 ---
 
 ## 🎨 CODE STYLE GUIDELINES
 
-### 일반 원칙
-- **명확성 우선**: 짧은 코드보다 읽기 쉬운 코드
-- **일관성 유지**: 기존 패턴을 따름
-- **문서화**: 복잡한 로직에는 주석 추가
+### Python (Backend)
+- **스타일**: snake_case
+- **Linter**: Ruff
+- **타입 힌트**: 필수
 
-### Naming Conventions
-
-| 요소 | 스타일 | 예시 |
-|------|--------|------|
-| 변수/함수 | camelCase 또는 snake_case | `mousePosition`, `mouse_position` |
-| 클래스/타입 | PascalCase | `AirMouseController` |
-| 상수 | SCREAMING_SNAKE_CASE | `MAX_VELOCITY` |
-| 파일명 | kebab-case 또는 snake_case | `air-mouse.ts`, `air_mouse.py` |
-
-### Import 순서
-```
-1. 표준 라이브러리
-2. 외부 패키지/서드파티
-3. 내부 모듈 (절대 경로)
-4. 내부 모듈 (상대 경로)
-```
-
-### Error Handling
-```typescript
-// ✅ 좋음: 명시적 에러 처리
-try {
-  await connectMouse();
-} catch (error) {
-  logger.error('마우스 연결 실패:', error);
-  throw new ConnectionError('마우스 연결에 실패했습니다', { cause: error });
-}
-
-// ❌ 나쁨: 빈 catch 블록
-try {
-  await connectMouse();
-} catch (e) {}
-```
-
-### Type Safety (TypeScript/Typed Languages)
-```typescript
-// ❌ 금지
-const data = response as any;
-// @ts-ignore
-// @ts-expect-error
-
-// ✅ 권장
-interface MouseData {
-  x: number;
-  y: number;
-  velocity: number;
-}
-const data: MouseData = validateResponse(response);
-```
+### TypeScript (Frontend)
+- **스타일**: camelCase (변수/함수), PascalCase (컴포넌트/타입)
+- **절대 금지**: `as any`, `@ts-ignore`
+- **검증**: `npx tsc --noEmit`
 
 ---
 
-## 🚨 HARD RULES (반드시 준수)
+## 🚨 HARD RULES
 
 1. **타입 안전성**: `as any`, `@ts-ignore` 사용 금지
 2. **빈 catch 블록 금지**: 모든 에러는 명시적으로 처리
-3. **커밋 전 검증**: lint/test 통과 필수
-4. **시크릿 관리**: API 키, 비밀번호는 환경변수 사용
-
----
-
-## 🧪 TESTING GUIDELINES
-
-### 테스트 파일 위치
-- 소스 파일과 같은 디렉토리: `*.test.ts`, `*.spec.ts`
-- 또는 별도 tests/ 디렉토리
-
-### 테스트 작성 패턴
-```typescript
-describe('AirMouse', () => {
-  describe('connect()', () => {
-    it('should establish connection with valid config', async () => {
-      // Arrange
-      const config = createTestConfig();
-      
-      // Act
-      const result = await mouse.connect(config);
-      
-      // Assert
-      expect(result.connected).toBe(true);
-    });
-  });
-});
-```
+3. **커밋 전 검증**: TypeScript 컴파일, lint 통과 필수
+4. **시크릿 관리**: API 키는 환경변수 (.env.local) 사용
 
 ---
 
@@ -200,50 +220,32 @@ describe('AirMouse', () => {
 ### Commit Message Format
 ```
 <type>(<scope>): <subject>
-
-<body>
 ```
 
 ### Types
 - `feat`: 새 기능
 - `fix`: 버그 수정
 - `docs`: 문서 변경
-- `style`: 포맷팅 (코드 변경 없음)
 - `refactor`: 리팩토링
-- `test`: 테스트 추가/수정
-- `chore`: 빌드/설정 변경
+- `test`: 테스트
 
 ### 예시
 ```
-feat(mouse): 제스처 인식 기능 추가
-
-- 스와이프 제스처 감지 로직 구현
-- 제스처별 콜백 핸들러 추가
+feat(backend): implement FastAPI WebSocket server
+fix(frontend): resolve TypeScript compilation errors
 ```
 
 ---
 
 ## 🔍 WHERE TO LOOK
 
-| 작업 | 위치 | 참고 |
-|------|------|------|
-| 엔트리 포인트 | `src/main.*` | 앱 시작점 |
-| 비즈니스 로직 | `src/` | 핵심 기능 |
-| 테스트 | `tests/` 또는 `*.test.*` | 테스트 코드 |
-| 설정 | `*.config.*`, `.*rc` | 빌드/린트 설정 |
-
----
-
-## 📚 REFERENCE
-
-- [Project README](./README.md) - 프로젝트 개요 (작성 예정)
-- [API Documentation](./docs/api.md) - API 문서 (작성 예정)
-
----
-
-## ⚠️ TODO: 프로젝트 설정 후 업데이트 필요
-
-- [ ] 실제 사용 언어/프레임워크에 맞게 명령어 수정
-- [ ] 디렉토리 구조 업데이트
-- [ ] 린트/포맷 설정 파일 경로 추가
-- [ ] CI/CD 워크플로우 문서화
+| 작업 | 위치 |
+|------|------|
+| WebSocket 서버 | `backend/main.py` |
+| 손 인식 로직 | `backend/hand_tracker.py` |
+| 마우스 제어 | `backend/mouse_controller.py` |
+| React 앱 진입점 | `frontend/src/App.tsx` |
+| WebSocket 훅 | `frontend/src/hooks/useWebSocket.ts` |
+| 손 시각화 | `frontend/src/components/HandLandmarks.tsx` |
+| HUD UI | `frontend/src/components/HUDOverlay.tsx` |
+| 타입 정의 | `frontend/src/types/websocket.ts` |

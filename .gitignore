@@ -2,6 +2,8 @@
 backend/__pycache__/
 backend/*.pyc
 backend/.env
+nul
+
 
 # Frontend
 frontend/node_modules/
@@ -34,7 +36,6 @@ wheels/
 venv/
 ENV/
 env/
-
 # IDE
 .vscode/
 .idea/
@@ -60,3 +61,4 @@ yarn-error.log
 .env
 .env.local
 .env.*.local
+.sisyphus/

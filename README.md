@@ -4,7 +4,12 @@
 ![React](https://img.shields.io/badge/React-18.0+-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-Latest-00C0FF?style=flat-square)
 
-> **"비접촉 제스처로 제어하는 미래형 인터페이스"** > 물리적 장치 없이 웹캠 하나로 마우스를 제어하고 시스템을 핸들링하는 Open-Source 프로젝트입니다.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e07af12-72ec-47b3-926d-d6012ab1df93" width="100%" alt="Air Mouse Main Concept" />
+</p>
+
+> **"비접촉 제스처로 제어하는 미래형 인터페이스"**
+> 물리적 장치 없이 웹캠 하나로 마우스를 제어하고 시스템을 핸들링하는 Open-Source 프로젝트입니다.
 
 ---
 
@@ -26,7 +31,10 @@
 
 ## 2. 시스템 아키텍처 및 데이터 파이프라인
 
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f17a0822-965d-4eff-a889-c02ee1c9ca03" width="48%" />
+  <img src="https://github.com/user-attachments/assets/3c43881a-8fa8-4c0f-8ef7-4a08b6bc6f58" width="48%" />
+</p>
 
 ### 2.1 데이터 흐름 (INPUT/OUTPUT)
 
@@ -71,13 +79,8 @@
 
 ## 🛠️ 시작하기 (Quick Start)
 
+### Backend
 ```bash
-# Backend 설치 및 실행
 cd backend
 pip install -r requirements.txt
 python main.py
-
-# Frontend 설치 및 실행
-cd frontend
-npm install
-npm run dev

@@ -35,7 +35,7 @@ export type GestureType =
   | 'palm_open';
 
 /**
- * HandTrackingMessage - Server to Client message
+ * HandTrackingMessage - Server to Client message (Active Mode)
  * 
  * Sent by Python backend with hand tracking data and gesture recognition results.
  * Maps to Python: extract_landmarks(), is_palm_open(), gesture detection
@@ -43,6 +43,8 @@ export type GestureType =
 export interface HandTrackingMessage {
   /** Message type identifier */
   type: 'hand_data';
+  /** Base64 encoded JPEG image */
+  image?: string;
   /** Array of hand landmarks (21 points from MediaPipe) */
   landmarks: HandLandmark[];
   /** Detected gesture type */
@@ -58,6 +60,32 @@ export interface HandTrackingMessage {
   fps: number;
   /** Server timestamp (milliseconds) */
   timestamp: number;
+}
+
+/**
+ * FaceDataMessage - Server to Client message (Face Analysis Mode)
+ * 
+ * Sent during Face Scanning/Analysis/Report stages.
+ */
+export interface FaceDataMessage {
+  type: 'face_data';
+  /** Base64 encoded JPEG image */
+  image?: string;
+  /** Current app state on backend */
+  state: string;
+  /** Distance status */
+  status: 'WAIT' | 'PERFECT' | 'TOO_CLOSE' | 'TOO_FAR' | 'BAD_POSE';
+  /** Current face width ratio */
+  distance_ratio: number;
+  /** Target ratio (approx 1m) */
+  target_ratio: number;
+  /** Analysis results (only available in REPORT state) */
+  face_results?: {
+    total: number;
+    rank: string;
+    details: Record<string, { score: number; val: number }>;
+  };
+  fps: number;
 }
 
 /**
@@ -86,4 +114,4 @@ export type ConnectionState =
 /**
  * WebSocket message union type for type-safe message handling
  */
-export type WebSocketMessage = HandTrackingMessage | ConfigMessage;
+export type WebSocketMessage = HandTrackingMessage | FaceDataMessage | ConfigMessage;

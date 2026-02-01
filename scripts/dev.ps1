@@ -4,26 +4,19 @@
 Write-Host "Starting Air Mouse Development Environment..." -ForegroundColor Cyan
 Write-Host ""
 
-# Python path (using uv-managed Python)
-$PYTHON = "$env:USERPROFILE\.local\bin\python3.14.exe"
-$UV = "$env:USERPROFILE\.local\bin\uv.exe"
+# Path to virtual environment python
+$VENV_PYTHON = "$PSScriptRoot\..\backend\.venv\Scripts\python.exe"
 
-# Check if Python exists
-if (-not (Test-Path $PYTHON)) {
-    Write-Host "Python not found at: $PYTHON" -ForegroundColor Red
-    Write-Host "Trying uv run instead..." -ForegroundColor Yellow
-    $USE_UV = $true
-} else {
-    $USE_UV = $false
+# Check if venv exists
+if (-not (Test-Path $VENV_PYTHON)) {
+    Write-Host "Virtual environment not found at: $VENV_PYTHON" -ForegroundColor Red
+    Write-Host "Please run 'uv venv' inside backend folder first." -ForegroundColor Yellow
+    exit 1
 }
 
 # Start Backend (Python FastAPI)
 Write-Host "[1/2] Starting Backend Server (Python FastAPI)..." -ForegroundColor Green
-if ($USE_UV) {
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\..\backend'; Write-Host 'Backend Server' -ForegroundColor Yellow; uv run python main.py"
-} else {
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\..\backend'; Write-Host 'Backend Server' -ForegroundColor Yellow; & '$PYTHON' main.py"
-}
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\..\backend'; Write-Host 'Backend Server' -ForegroundColor Yellow; & '$VENV_PYTHON' main.py"
 
 # Wait a moment for backend to initialize
 Start-Sleep -Seconds 3

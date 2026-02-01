@@ -32,8 +32,8 @@
 ## 2. 시스템 아키텍처 및 데이터 파이프라인
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/ed97c647-9cd6-4491-8e43-5f50863bca0b" width="48%" />
-  <img src="https://github.com/user-attachments/assets/898de7a9-d75e-4819-bd42-53f0fdb40084" width="48%" />
+  <img src="https://github.com/user-attachments/assets/3607112b-c5db-4e15-8376-801535bdd4d3" width="48%" />
+  <img src="https://github.com/user-attachments/assets/2f075ff8-48b1-4bb2-9466-ebb84a78433b" width="48%" />
 </p>
 
 ### 2.1 데이터 흐름 (INPUT/OUTPUT)

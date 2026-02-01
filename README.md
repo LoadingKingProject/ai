@@ -5,7 +5,7 @@
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-Latest-00C0FF?style=flat-square)
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/6e07af12-72ec-47b3-926d-d6012ab1df93" width="100%" alt="Air Mouse Main Concept" />
+  <img src="https://github.com/user-attachments/assets/6e07af12-72ec-47b3-926d-d6012ab1df93" width="50%" alt="Air Mouse Main Concept" />
 </p>
 
 > **"비접촉 제스처로 제어하는 미래형 인터페이스"**
